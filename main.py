@@ -1,77 +1,40 @@
-import pygame, sys
-from pygame.locals import QUIT, KEYDOWN
+# Função recursiva para achar o numero maximo de regioes (Sua lógica perfeita!)
+def calcula_regioes(n):
+    # Caso base
+    if n == 0:
+        return 1
+    
+    # Passo recursivo resolvendo as combinacoes
+    comb3 = ((n - 1) * (n - 2) * (n - 3)) // 6
+    comb1 = n - 1
+    
+    return calcula_regioes(n - 1) + comb3 + comb1
 
-clock = pygame.time.Clock()
-
-hero_img = pygame.image.load("assets/asets/Hero_Walk-01.png")
-
-
-
-
-
-curr_frame = 0
-anim_time = 0
-hero_walk_list = []
-for i in range(4):
-    hero_walk_list.append(pygame.image.load(f"assets/assets/Hero_Walk_0{i+1}.png"))
-
-run_animacion = False
-curr_frame_mm = 0
-anim_time_mm = 0
-herowalk_spritesheet = pygame.image.load('megaman.png')
-
-pygame.init()
-pygame.display.set_caption("Hello World!")
-
-
-
-
-altura = 170
-largura = 1280
-screen = pygame.display.set_mode((largura, altura))
-pygame.display.set_caption("Hello World!")
-
-while True:
-    for event in pygame.event.get():
-        if event.type == QUIT:
-            pygame.quit()
-            sys.exit()
+# Função para mostrar o resultado formatado usando while
+def mostra_sequencia(m):
+    print("=========================================")
+    print(" Filtros dos Sonhos - Termos da Sequencia")
+    print("=========================================")
+    print("n     a(n)")
+    print("-----------------------------------------")
+    
+    # Começamos com n = 1
+    n = 1
+    
+    # O laço vai continuar rodando enquanto n for menor ou igual a m
+    while n <= m:
+        atual = calcula_regioes(n)
+        print(f"{n}     {atual}")
         
+        # IMPORTANTE: Avança para o próximo número para não ficar num laço infinito
+        n = n + 1
         
-        if event.type == KEYDOWN:
-            if event.key == pygame.K_SPACE:
-                run_animacion = True
-    
-    
-    
-    clock.tick(60)
-    dt = clock.get_time()
-    
-    #segundos da animação
-    if run_animacion:
-    
-        anim_time = anim_time = dt
-        anim_time_sec = anim_time/1000
+    print("=========================================")
 
-        if anim_time_sec > 0.15:
-            curr_frame += 1
-        if curr_frame> len(hero_walk_list) -1:
-            curr_frame = 0
-        anim_time_sec = 0
-    #curr_frame += 1
+# --- Programa Principal ---
+m = int(input("Digite quantos termos voce quer ver (m): "))
 
-    if run_animacion:
-        anim_time_mm
-    #Desenho dos elementos na tela
-    screen.fill((255,255,255))
-
-    # screenblit(dog_image, (0,0))
-    screen.blit(hero_walk_list[curr_frame], (0,0))
-
-
-    if curr_frame_mm < 5:
-        screen.blit(herowalk_spritesheet(200, 200), (60*curr_frame_mm, 60, 60))
-    else:
-        screen.blit(herowalk_spritesheet(200, 200), (60*curr_frame_mm- 5,), 60, 60, 60)
-    
-    pygame.display.update()
+if m <= 0:
+    print("Por favor, digite um numero maior que zero.")
+else:
+    mostra_sequencia(m)
