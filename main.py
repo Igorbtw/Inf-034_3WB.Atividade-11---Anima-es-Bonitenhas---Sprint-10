@@ -1,11 +1,22 @@
 from pygame import *
 import sys
 import random
+import os
+import glob
 
 from pygame.locals import QUIT, KEYDOWN
 
 clock = time.Clock()
 
+for padrao, nome_certo in [
+    ("*spider*", "spider.png"),
+    ("*May*",    "May.png"),
+    ("*hk*",     "hk.png"),
+]:
+    for arq in glob.glob(padrao):
+        if arq != nome_certo:
+            os.rename(arq, nome_certo)
+            break
 
 spider_sheet = image.load("spider.png")
 may_sheet    = image.load("May.png")
@@ -16,10 +27,10 @@ grass_img = transform.scale(grass_img, (800, 400))
 ceu_img = image.load("ceunovo.jpg")
 ceu_img = transform.scale(ceu_img, (800, 400))
 
-
+# hollow knight - heroi principal
 hk_starts = [1,51,101,126,151,201,226,251,301,351,401,451,476,501,526,551,576,626,651,701,726,776,826]
 HK_FW, HK_FH = 24, 52
-TARGET_W, TARGET_H = 300, 400   # mesmo tamanho que o herói original
+TARGET_W, TARGET_H = 300, 400
 
 def corta_hk(idx):
     x = hk_starts[idx]
@@ -27,19 +38,14 @@ def corta_hk(idx):
     surf.blit(hk_sheet, (0, 0), (x, 0, HK_FW, HK_FH))
     return transform.scale(surf, (TARGET_W, TARGET_H))
 
-# walk right  → frames 0-5  (ciclo de andar)
 kirk_walk_list        = [corta_hk(i) for i in range(6)]
-# walk left   → mesmos frames espelhados (igual o original usava lista_2)
 kirk_walk_list_2      = [transform.flip(corta_hk(i), True, False) for i in range(6)]
-# walk up     → frames 6-10
 kirk_walk_list_up     = [corta_hk(i) for i in range(6, 10)]
-# walk down   → frames 10-14
 kirk_walk_list_down   = [corta_hk(i) for i in range(10, 14)]
-# idle / padrão → frame 0
 hero_img      = corta_hk(0)
 hero_standard = corta_hk(0)
 
-
+# may - companheira do jogador
 MAY_FW, MAY_FH = 16, 58
 MAY_TARGET_W, MAY_TARGET_H = 50, 50
 
@@ -48,12 +54,10 @@ def corta_may(idx):
     surf.blit(may_sheet, (0, 0), (idx * MAY_FW, 0, MAY_FW, MAY_FH))
     return transform.scale(surf, (MAY_TARGET_W, MAY_TARGET_H))
 
-may_anim = [corta_may(i) for i in range(7)]   # 7 frames de animação
+may_anim = [corta_may(i) for i in range(7)]
 
-
+# spider-man - npcs
 SP_FW, SP_FH = 32, 32
-SP_COLS = 298 // SP_FW   # 9
-SP_ROWS = 2              # rows válidos (0,1,2 -> usamos 0 e 1 como base)
 SP_TARGET = 50
 
 def corta_spider(row, col):
@@ -61,20 +65,14 @@ def corta_spider(row, col):
     surf.blit(spider_sheet, (0, 0), (col * SP_FW, row * SP_FH, SP_FW, SP_FH))
     return transform.scale(surf, (SP_TARGET, SP_TARGET))
 
-# Monta 11 frames por "cor" (igual o dino original tinha 11 frames)
-# row 0 = andando frente, row 1 = outras poses, row 2 = poses extras
-# Vamos usar frames da linha 0 e 1 intercalados para dar variedade
-sp_base   = [corta_spider(0, c) for c in range(9)] + [corta_spider(1, c) for c in range(2)]  # 11
-sp_flip   = [transform.flip(f, True, False) for f in sp_base]                                  # espelhado
-sp_row2   = [corta_spider(1, c) for c in range(9)] + [corta_spider(2, c) for c in range(2)]  # 11
-sp_row2f  = [transform.flip(f, True, False) for f in sp_row2]                                 # espelhado
+sp_base  = [corta_spider(0, c) for c in range(9)] + [corta_spider(1, c) for c in range(2)]
+sp_flip  = [transform.flip(f, True, False) for f in sp_base]
+sp_row2  = [corta_spider(1, c) for c in range(9)] + [corta_spider(2, c) for c in range(2)]
+sp_row2f = [transform.flip(f, True, False) for f in sp_row2]
 
-# lista equivalente ao opcoes_de_cores
 opcoes_de_cores = [sp_base, sp_flip, sp_row2, sp_row2f]
 
-
-# posição do herói
-
+loc_x = 100
 loc_y = 200
 
 dino_animation = False
@@ -95,9 +93,6 @@ z_velocity = 0
 current_frame = 0
 anim_time = 0
 anim_time_d = 0
-
-
-# Classe NPC Spider-Man 
 
 class DinossauroNPC:
     def __init__(self, limite_x, chao_y, listas_de_cores):
@@ -142,9 +137,6 @@ for i in range(50):
 
 current_frame_gui = 0
 anim_time_gui = 0
-
-
-# Inicialização
 
 init()
 screen = display.set_mode((800, 600))
@@ -244,7 +236,6 @@ while True:
             is_jumping = False
             z_velocity = 0
 
-    # --- desenha ---
     screen.fill((155, 155, 155))
     screen.blit(ceu_img, (0, 0))
     screen.blit(grass_img, (0, 200))
@@ -252,21 +243,19 @@ while True:
     for dino in bando_de_dinos:
         dino.atualizar_e_desenhar(screen, dt, dino.minha_animacao)
 
-    # companion (May) — posição igual ao dino_normal original
     if dino_animation == True and run_animation_backwards == False:
         screen.blit(may_anim[current_frame % len(may_anim)], (loc_x + 70, loc_y + 250))
     if dino_animation == True and run_animation_backwards == True:
         screen.blit(transform.flip(may_anim[current_frame % len(may_anim)], True, False), (loc_x + 140, loc_y + 240))
 
-    # herói principal (Hollow Knight)
     if run_animation == True and run_animation_backwards == False and run_animation_up == False and run_animation_down == False:
-        screen.blit(kirk_walk_list[current_frame], (loc_x, loc_y - z_jump))
+        screen.blit(kirk_walk_list[current_frame % len(kirk_walk_list)], (loc_x, loc_y - z_jump))
     if run_animation_backwards == True and run_animation == False and run_animation_up == False and run_animation_down == False:
-        screen.blit(kirk_walk_list_2[current_frame], (loc_x, loc_y - z_jump))
+        screen.blit(kirk_walk_list_2[current_frame % len(kirk_walk_list_2)], (loc_x, loc_y - z_jump))
     if run_animation_up == True and run_animation_down == False:
-        screen.blit(kirk_walk_list_up[current_frame], (loc_x, loc_y - z_jump))
+        screen.blit(kirk_walk_list_up[current_frame % len(kirk_walk_list_up)], (loc_x, loc_y - z_jump))
     if run_animation_down == True and run_animation_up == False:
-        screen.blit(kirk_walk_list_down[current_frame], (loc_x, loc_y - z_jump))
+        screen.blit(kirk_walk_list_down[current_frame % len(kirk_walk_list_down)], (loc_x, loc_y - z_jump))
     if run_animation == False and run_animation_backwards == False and run_animation_up == False and run_animation_down == False:
         screen.blit(hero_standard, (loc_x, loc_y - z_jump))
     if run_animation == True and run_animation_backwards == True and run_animation_up == False and run_animation_down == False:
